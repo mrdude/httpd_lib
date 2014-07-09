@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact name="httpd-interfaces:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/httpd_interfaces_jar</output-path>
+    <root id="root">
+      <element id="archive" name="httpd-interfaces.jar">
+        <element id="module-output" name="httpd-interfaces" />
+      </element>
+    </root>
+  </artifact>
+</component>

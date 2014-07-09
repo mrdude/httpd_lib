@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/httpd-async/httpd-async.iml" filepath="$PROJECT_DIR$/httpd-async/httpd-async.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpd-async2/httpd-async2.iml" filepath="$PROJECT_DIR$/httpd-async2/httpd-async2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpd-interfaces/httpd-interfaces.iml" filepath="$PROJECT_DIR$/httpd-interfaces/httpd-interfaces.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpd-sync/httpd-sync.iml" filepath="$PROJECT_DIR$/httpd-sync/httpd-sync.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
+    </modules>
+  </component>
+</project>
+
