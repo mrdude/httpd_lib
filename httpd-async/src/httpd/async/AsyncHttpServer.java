@@ -45,45 +45,36 @@ public class AsyncHttpServer implements HttpServer
 	private RequestHandler reqHandler;
 	private Selector selector;
 
-	public boolean start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces)
+	public void start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces) throws Exception
 	{
 		if( reqHandler == null )
-			return false;
+			throw new NullPointerException("No RequestHandler was provided");
 
 		this.reqHandler = reqHandler;
 
-		try
-		{
-			selector = Selector.open();
+		selector = Selector.open();
 
-			System.out.println("Bound interfaces:");
-			for( InetSocketAddress addr : listenInterfaces )
+		System.out.println("Bound interfaces:");
+		for( InetSocketAddress addr : listenInterfaces )
+		{
+			try
 			{
-				try
-				{
-					ServerSocketChannel ssc = ServerSocketChannel.open();
-					ssc.configureBlocking(false);
-					ssc.bind( addr );
-					ssc.register(selector, SelectionKey.OP_ACCEPT);
+				ServerSocketChannel ssc = ServerSocketChannel.open();
+				ssc.configureBlocking(false);
+				ssc.bind( addr );
+				ssc.register(selector, SelectionKey.OP_ACCEPT);
 
-					System.out.println("\t" +ssc.getLocalAddress());
-				}
-				catch(IOException e) {}
+				System.out.println("\t" +ssc.getLocalAddress());
 			}
-			System.out.println("End of bound interfaces");
+			catch(IOException e) {}
 		}
-		catch(IOException e)
-		{
-			return false;
-		}
+		System.out.println("End of bound interfaces");
 
 		t = new Thread( new Runnable() {
 			public void run() { AsyncHttpServer.this.run(); }
 		});
 		t.setName("AsyncHttpServerThread");
 		t.start();
-
-		return true;
 	}
 
 	private void run()

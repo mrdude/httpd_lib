@@ -40,24 +40,20 @@ public class BasicWebServer
 	/** We will be serving files from this directory */
 	private static final File docroot = new File("docroot");
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		HttpServer sv = new AsyncHttpServer2();
-		if( !sv.start( new RequestHandlerImpl( docroot ), getListenInterfaces() ) )
-		{
-			System.out.println("Couldn't start the server.");
-			System.exit(1);
-		}
+		sv.start( new RequestHandlerImpl( docroot ), getListenInterfaces() );
 
-		System.out.println("HTTP server is now running in a separate thread and serving files from " +docroot.getAbsolutePath());
+		System.out.println( "HTTP server is now running in a separate thread and serving files from " + docroot.getAbsolutePath() );
 
 		doOtherApplicationStuff();
 
-		System.out.println("Stopping server");
+		System.out.println( "Stopping server" );
 		sv.stop();
-		System.out.println("Server is stopped");
+		System.out.println( "Server is stopped" );
 
-		System.exit(0);
+		System.exit( 0 );
 	}
 
 	private static List<InetSocketAddress> getListenInterfaces()

@@ -38,14 +38,10 @@ import java.util.Scanner;
 
 public class QuickAndDirtySample
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		HttpServer sv = new AsyncHttpServer2();
-		if( !sv.start( getRequestHandlerImpl(), getListenInterfaces() ) )
-		{
-			System.out.println("Couldn't start the server.");
-			System.exit(1);
-		}
+		sv.start( getRequestHandlerImpl(), getListenInterfaces() );
 
 		System.out.println("HTTP server is now running in a seperate thread");
 

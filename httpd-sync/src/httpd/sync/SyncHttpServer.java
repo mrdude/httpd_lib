@@ -45,12 +45,12 @@ public class SyncHttpServer implements HttpServer
 
 	/**
 	 * Starts the server
-	 * @return true if the server was successfully started, false if not
+	 * @throws Exception if the server could not be started
 	 */
-	public boolean start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces)
+	public void start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces) throws Exception
 	{
 		if( reqHandler == null )
-			return false;
+			throw new NullPointerException("No RequestHandler was provided");
 
 		this.reqHandler = reqHandler;
 
@@ -74,16 +74,10 @@ public class SyncHttpServer implements HttpServer
 		}
 		System.out.println("End of bound interfaces");
 
-		//make sure that we started some servers
-		if( ssList.size() == 0 )
-			return false;
-
 		//spin up the worker threads
 		final int workerThreadCount = 2;
 		for( int x=0; x<workerThreadCount; x++ )
 			new SyncRequestProcessor(this, x);
-
-		return true;
 	}
 
 	/** Signals the server to stop */

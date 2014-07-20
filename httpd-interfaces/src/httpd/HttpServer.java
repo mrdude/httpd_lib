@@ -30,9 +30,9 @@ public interface HttpServer
 {
 	/**
 	 * Starts the server
-	 * @return true if the server was successfully started, false if not
+	 * @throws Exception if the server couldn't be started
 	 */
-	boolean start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces);
+	void start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces) throws Exception;
 
 	/** Signals the server to stop */
 	void stop();
