@@ -25,6 +25,8 @@ package httpd.async2;
 
 import com.google.common.collect.ImmutableMap;
 import httpd.HttpRequest;
+import httpd.common.Parsers;
+import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -52,29 +54,15 @@ class AsyncHttpRequest2 implements HttpRequest
 		if( locked )
 			throw new RuntimeException("Called HttpRequest.processInitialRequest() on a locked HttpRequest");
 
-		String[] split = line.split(" ");
+		Parsers.InitialRequestLine req = Parsers.processInitialRequestLine( line );
 
-		if( split.length != 3 )
+		if( req == null )
 			return false;
 
-		method = split[0];
-		protocol = split[2];
-
-		try
-		{
-			URI uri = new URI( split[1] );
-
-			request = uri.getPath();
-
-			if( uri.getQuery() != null )
-				getParameters = parseGetParameters( uri.getQuery() );
-			else
-				getParameters = ImmutableMap.of();
-		}
-		catch(URISyntaxException e)
-		{
-			return false;
-		}
+		method = req.method;
+		request = req.request;
+		protocol = req.protocol;
+		getParameters = req.getParameters;
 
 		return true;
 	}
