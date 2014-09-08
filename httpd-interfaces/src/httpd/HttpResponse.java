@@ -38,7 +38,7 @@ public interface HttpResponse
 	 * Adds/sets a header
 	 * @return this
 	 */
-	HttpResponse header(String key, String value);
+	HttpResponse header(String key, Object value);
 
 	/**
 	 * Sets the InputStream that will become the body of the response

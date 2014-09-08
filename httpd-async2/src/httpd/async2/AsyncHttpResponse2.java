@@ -55,9 +55,9 @@ class AsyncHttpResponse2 implements HttpResponse
 	 * Adds/sets a header
 	 * @return this
 	 */
-	public AsyncHttpResponse2 header(String key, String value)
+	public AsyncHttpResponse2 header(String key, Object value)
 	{
-		headers.put(key, value);
+		headers.put(key, value.toString());
 		return this;
 	}
 

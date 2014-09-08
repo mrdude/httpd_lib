@@ -8,8 +8,8 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="httpd-interfaces" />
-    <orderEntry type="library" name="com.google.guava:guava-collections:r03" level="application" />
     <orderEntry type="library" name="org.slf4j:slf4j-api:1.7.7" level="application" />
+    <orderEntry type="library" name="com.google.guava:guava-collections:r03" level="project" />
   </component>
 </module>
 

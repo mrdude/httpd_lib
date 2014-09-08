@@ -54,9 +54,9 @@ class SyncHttpResponse implements HttpResponse
 	 * Adds/sets a header
 	 * @return this
 	 */
-	public SyncHttpResponse header(String key, String value)
+	public SyncHttpResponse header(String key, Object value)
 	{
-		headers.put(key, value);
+		headers.put(key, value.toString());
 		return this;
 	}
 
