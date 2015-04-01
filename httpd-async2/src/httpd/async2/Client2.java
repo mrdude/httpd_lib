@@ -287,7 +287,7 @@ class Client2
 		}
 	}
 
-	private void close(SelectionKey key)
+	void close(SelectionKey key)
 	{
 		SocketChannel sc = (SocketChannel)key.channel();
 		key.cancel();

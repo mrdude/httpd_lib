@@ -69,7 +69,10 @@ public class AsyncHttpServer2 implements HttpServer
 
 				logger.info("\t{}", ssc.getLocalAddress());
 			}
-			catch(IOException e) {}
+			catch(IOException e)
+			{
+				logger.error("Couldn't bind to address: {}", addr, e);
+			}
 		}
 		logger.info("End of bound interfaces");
 
@@ -80,36 +83,67 @@ public class AsyncHttpServer2 implements HttpServer
 
 	private void run()
 	{
-		while( !quitFlag )
+		while( true )
 		{
+			//update the selector
 			try
 			{
-				selector.select();
-				Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-				while( it.hasNext() )
-				{
-					SelectionKey key = it.next();
-					it.remove();
-
-					if( !key.isValid() )
-						continue;
-
-					if( key.isAcceptable() )
-						accept(key);
-					else if( key.isReadable() )
-						read(key);
-					else if( key.isWritable() )
-						write(key);
-				}
+				updateSelector();
 			}
 			catch(IOException e)
 			{
 				System.err.println("Caught an exception from a selector:");
 				e.printStackTrace(System.err);
 			}
+
+			//exit the loop if we have no clients and the quitFlag is set
+			if( quitFlag && countClients() == 0 )
+				break;
 		}
 
-		//TODO shut down all Sockets, ServerSockets, and then close the selector
+		//close the selector and all ServerSockets
+		logger.info("Finished all requests...shutting down");
+		try
+		{
+			selector.close();
+		}
+		catch( IOException e )
+		{
+			e.printStackTrace();
+		}
+
+		logger.info("Shut down");
+	}
+
+	private int countClients()
+	{
+		int count = 0;
+		for( SelectionKey key : selector.keys() )
+			if( key.channel() instanceof SocketChannel )
+				count++;
+
+		return count;
+	}
+
+	private void updateSelector() throws IOException
+	{
+		selector.select();
+		Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+		while( it.hasNext() )
+		{
+			SelectionKey key = it.next();
+			it.remove();
+
+			if( !key.isValid() )
+				continue;
+
+			if( key.isAcceptable() && !quitFlag ) //only accept new connections if quitFlag == false
+				accept(key);
+			else if( key.isReadable() )
+				read(key);
+			else if( key.isWritable() )
+				write(key);
+		}
 	}
 
 	private void accept(SelectionKey key)
@@ -142,6 +176,7 @@ public class AsyncHttpServer2 implements HttpServer
 	{
 		quitFlag = true;
 		selector.wakeup();
+		logger.info("Waiting for current requests to complete...");
 	}
 
 	RequestHandler requestHandler() { return reqHandler; }
