@@ -72,7 +72,6 @@ class AsyncHttpResponse2 implements HttpResponse
 	String responseLine() { return responseLine; }
 	Iterator<Map.Entry<String, String>> headerIterator() { return headers.entrySet().iterator(); }
 	InputStream body() { return in; }
-	boolean deferredWrite() { return true; }
 	boolean hasContentLengthHeader() { return headers.containsKey("Content-Length"); }
 	void closeBodyStream()
 	{
