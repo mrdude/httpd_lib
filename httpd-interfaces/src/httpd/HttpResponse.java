@@ -54,4 +54,11 @@ public interface HttpResponse
 	{
 		return body( new ByteArrayInputStream( b ) );
 	}
+
+	/**
+	 * By toggling this flag, you hint to the HttpServer handling your response that you want it to be handled with a deferred write.
+	 * Only AsyncHttpServer2 supports deferred writes.
+	 * @return this
+	 */
+	HttpResponse deferredWrite(boolean on);
 }
