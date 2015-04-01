@@ -67,22 +67,6 @@ class AsyncHttpRequest2 implements HttpRequest
 		return true;
 	}
 
-	private ImmutableMap<String,String> parseGetParameters(String getParameterString)
-	{
-		HashMap<String, String> map = new HashMap<>();
-
-		for( String param : getParameterString.split("&") )
-		{
-			String split[] = param.split("=", 2);
-
-			String key = split[0];
-			String value = split.length >= 2 ? split[1] : "";
-			map.put(key, value);
-		}
-
-		return ImmutableMap.copyOf(map);
-	}
-
 	/**
 	 * Processes a single line of the header
 	 * Calling this method on a locked HttpRequest will result in a RuntimeException
