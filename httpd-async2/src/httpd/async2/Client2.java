@@ -307,12 +307,11 @@ class Client2
 
 	private class CopyingDeferredWrite extends DeferredWrite
 	{
-		private ByteBuffer bb = ByteBuffer.allocate(1024 * 4);
 		private ReadableByteChannel inChannel;
 
 		public CopyingDeferredWrite( InputStream in )
 		{
-			bb.position(0).flip();
+			buf.position( 0 ).flip();
 			inChannel = Channels.newChannel(in);
 		}
 
@@ -320,11 +319,11 @@ class Client2
 		{
 			try
 			{
-				if( bb.remaining() == 0 )
+				if( buf.remaining() == 0 )
 					refillByteBuffer();
 
 				SocketChannel sc = (SocketChannel)key.channel();
-				sc.write(bb);
+				sc.write( buf );
 
 				return false;
 			}
@@ -336,11 +335,11 @@ class Client2
 
 		private void refillByteBuffer() throws IOException
 		{
-			bb.clear();
-			int bytesRead = inChannel.read(bb);
+			buf.clear();
+			int bytesRead = inChannel.read( buf );
 			if( bytesRead == -1 ) //end of stream
 				throw new EOFException();
-			bb.flip();
+			buf.flip();
 		}
 	}
 
