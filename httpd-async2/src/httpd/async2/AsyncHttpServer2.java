@@ -73,9 +73,7 @@ public class AsyncHttpServer2 implements HttpServer
 		}
 		logger.info("End of bound interfaces");
 
-		t = new Thread( new Runnable() {
-			public void run() { AsyncHttpServer2.this.run(); }
-		});
+		t = new Thread( AsyncHttpServer2.this::run );
 		t.setName("AsyncHttpServerThread");
 		t.start();
 	}

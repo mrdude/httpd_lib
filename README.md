@@ -42,19 +42,9 @@ your Alexa Top 500 site that gets 1.5 gazillion hits a second.
 
 That being said, if you *do* end up using it for something cool like that, I'd love to hear about your experiences.
 
-What are SyncHttpServer and AsyncHttpServer?
---------------------------------------------
-
-They are old, deprecated implementations of the HTTP server part of the library. *Use AsyncHttpServer2 instead!*
-SyncHttpServer spawns a separate thread for each client connection, and AsyncHttpServer uses a
-single thread and asynchronous I/O. Neither implementation supports deferred writes.
-
 TODO
 ----
 
 * Finish up AsyncHttpServer2
 	* Server doesn't clean up (close Selector, ServerSockets, etc.) after itself on shutdown
 	* Server doesn't drop connections that take too long (so it is vulnerable to BEAST attacks)
-* Some more comments in the code might be nice
-* Add more samples
-* Finish Javadoc documentation

@@ -42,7 +42,6 @@ class Client2
 	private AsyncHttpRequest2 req;
 	private boolean useKeepAliveConnection; //should we use a keep-alive connection?
 
-	//used for deferred writes *only*
 	private DeferredWrite dw;
 
 	Client2(AsyncHttpServer2 sv, SocketChannel sc)
@@ -245,7 +244,10 @@ class Client2
 		key.interestOps( SelectionKey.OP_WRITE );
 
 		//prepare for deferred writes
-		dw = new DeferredWrite( res.body() );
+		if( res.body() instanceof FileInputStream )
+			dw = new FileChannelDeferredWrite( (FileInputStream)res.body() );
+		else
+			dw = new CopyingDeferredWrite( res.body() );
 	}
 
 	/** Writes the entire ByteBuffer to the given SocketChannel */
@@ -297,18 +299,23 @@ class Client2
 		catch(IOException e) {}
 	}
 
-	private class DeferredWrite
+	private abstract class DeferredWrite
+	{
+		/** Returns true when the write is finished */
+		public abstract boolean update(SelectionKey key);
+	}
+
+	private class CopyingDeferredWrite extends DeferredWrite
 	{
 		private ByteBuffer bb = ByteBuffer.allocate(1024 * 4);
 		private ReadableByteChannel inChannel;
 
-		public DeferredWrite(InputStream in)
+		public CopyingDeferredWrite( InputStream in )
 		{
 			bb.position(0).flip();
 			inChannel = Channels.newChannel(in);
 		}
 
-		/** Returns true when the write is finished */
 		public boolean update(SelectionKey key)
 		{
 			try
@@ -334,6 +341,37 @@ class Client2
 			if( bytesRead == -1 ) //end of stream
 				throw new EOFException();
 			bb.flip();
+		}
+	}
+
+	private class FileChannelDeferredWrite extends DeferredWrite
+	{
+		private FileChannel inChannel;
+		private long pos;
+
+		public FileChannelDeferredWrite(FileInputStream fis)
+		{
+			inChannel = fis.getChannel();
+		}
+
+		public boolean update(SelectionKey key)
+		{
+			try
+			{
+				SocketChannel sc = (SocketChannel) key.channel();
+
+				long bytesWritten = inChannel.transferTo( pos, 1024 * 4, sc );
+				if( bytesWritten == -1 ) //end of file was reached -- return true
+					return true;
+
+				pos += bytesWritten;
+			}
+			catch(IOException e)
+			{
+				//TODO I'm not entirely sure what to do with this exception....
+			}
+
+			return false;
 		}
 	}
 }
