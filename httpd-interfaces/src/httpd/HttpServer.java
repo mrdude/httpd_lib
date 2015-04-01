@@ -24,6 +24,7 @@ THE SOFTWARE.
 package httpd;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 
 public interface HttpServer
@@ -33,6 +34,15 @@ public interface HttpServer
 	 * @throws Exception if the server couldn't be started
 	 */
 	void start(RequestHandler reqHandler, List<InetSocketAddress> listenInterfaces) throws Exception;
+
+	/**
+	 * Starts the server
+	 * @throws Exception if the server couldn't be started
+	 */
+	default void start(RequestHandler reqHandler, InetSocketAddress... listenInterfaces) throws Exception
+	{
+		start( reqHandler, Arrays.asList(listenInterfaces) );
+	}
 
 	/** Signals the server to stop */
 	void stop();

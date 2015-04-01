@@ -50,12 +50,8 @@ public interface HttpResponse
 	 * Sets the byte array that will become the body of the response
 	 * @return this
 	 */
-	HttpResponse body(byte[] b);
-
-	/**
-	 * By toggling this flag, you hint to the HttpServer handling your response that you want it to be handled with a deferred write.
-	 * Only AsyncHttpServer2 supports deferred writes.
-	 * @return this
-	 */
-	HttpResponse deferredWrite(boolean on);
+	default HttpResponse body(byte[] b)
+	{
+		return body( new ByteArrayInputStream( b ) );
+	}
 }

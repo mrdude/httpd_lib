@@ -25,7 +25,6 @@ package httpd.async;
 
 import httpd.HttpResponse;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -67,16 +66,6 @@ class AsyncHttpResponse implements HttpResponse
 	public AsyncHttpResponse body(InputStream in)
 	{
 		this.in = in;
-		return this;
-	}
-
-	/**
-	 * Sets the byte array that will become the body of the response
-	 * @return this
-	 */
-	public AsyncHttpResponse body(byte[] b)
-	{
-		this.in = new ByteArrayInputStream(b);
 		return this;
 	}
 

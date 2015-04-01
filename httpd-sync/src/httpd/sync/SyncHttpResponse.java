@@ -70,16 +70,6 @@ class SyncHttpResponse implements HttpResponse
 		return this;
 	}
 
-	/**
-	 * Sets the byte array that will become the body of the response
-	 * @return this
-	 */
-	public SyncHttpResponse body(byte[] b)
-	{
-		this.in = new ByteArrayInputStream(b);
-		return this;
-	}
-
 	public SyncHttpResponse deferredWrite(boolean on)
 	{
 		return this;
