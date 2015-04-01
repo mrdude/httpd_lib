@@ -196,94 +196,59 @@ class Client2
 			useKeepAliveConnection = true;
 		}
 
-		//are we using deferred writes?
-		if( res.deferredWrite() )
+		//write the headers
 		{
-			/* to use deferred writes, all we do is write the headers and change the key's interest ops to OP_WRITE.
-			 * In the selector loop, the AsyncHttpServer2 will then call Client2.write()
-			 * whenever the socket can be written to (which, in practical terms, means that it will be called
-			 * continuously until all the data has been written).
-			 *
-			 * There are 2 main benefits to deferred writes:
-			 * 1) It doesn't block the AsyncHttpServer thread while the data is being written
-			 * 2) It doesn't have to buffer the entire response before beginning to send it
-			 *
-			 * Because of benefit #2, deferred writes should be preferred when sending large responses (like audio streams).
-			 */
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+			BufferedWriter out = new BufferedWriter( new OutputStreamWriter(byteOut) );
 
-			//write the headers
-			{
-				ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-				BufferedWriter out = new BufferedWriter( new OutputStreamWriter(byteOut) );
-
-				try
-				{
-					//response line
-					out.write( req.protocol() );
-					out.write(" ");
-					out.write( res.responseLine() );
-					out.newLine();
-
-					//headers
-					Iterator< Map.Entry<String, String> > it = res.headerIterator();
-					while( it.hasNext() )
-					{
-						Map.Entry<String, String> e = it.next();
-
-						out.write( e.getKey() );
-						out.write(": ");
-						out.write( e.getValue() );
-						out.newLine();
-					}
-
-					out.newLine();
-					out.flush();
-				}
-				catch(IOException e)
-				{
-					/* Since we are writing to a ByteArrayOutputStream, we don't
-					 * need to deal with this error.
-					 */
-				}
-
-				ByteBuffer bb = ByteBuffer.wrap( byteOut.toByteArray() );
-
-				try
-				{
-					writeByteBufferToSocket(bb, (SocketChannel)key.channel());
-				}
-				catch(IOException e) //the client closed the connection
-				{
-					close(key);
-					return;
-				}
-			}
-
-			//change the interestOps to OP_WRITE, so that the selection loop in AsyncHttpRequest2 will call Client2.write()
-			key.interestOps( SelectionKey.OP_WRITE );
-
-			//prepare for deferred writes
-			dw = new DeferredWrite( res.body() );
-		}
-		else //no
-		{
 			try
 			{
-				//convert the response to a bytebuffer
-				ByteBuffer responseBytes = responseToByteArray(res, req.protocol());
+				//response line
+				out.write( req.protocol() );
+				out.write(" ");
+				out.write( res.responseLine() );
+				out.newLine();
 
-				//write the bytes
-				SocketChannel sc = (SocketChannel)key.channel();
-				writeByteBufferToSocket(responseBytes, sc);
+				//headers
+				Iterator< Map.Entry<String, String> > it = res.headerIterator();
+				while( it.hasNext() )
+				{
+					Map.Entry<String, String> e = it.next();
 
-				//complete the request
-				completeRequest(key);
+					out.write( e.getKey() );
+					out.write(": ");
+					out.write( e.getValue() );
+					out.newLine();
+				}
+
+				out.newLine();
+				out.flush();
 			}
 			catch(IOException e)
 			{
+					/* Since we are writing to a ByteArrayOutputStream, we don't
+					 * need to deal with this error.
+					 */
+			}
+
+			ByteBuffer bb = ByteBuffer.wrap( byteOut.toByteArray() );
+
+			try
+			{
+				writeByteBufferToSocket(bb, (SocketChannel)key.channel());
+			}
+			catch(IOException e) //the client closed the connection
+			{
 				close(key);
+				return;
 			}
 		}
+
+		//change the interestOps to OP_WRITE, so that the selection loop in AsyncHttpRequest2 will call Client2.write()
+		key.interestOps( SelectionKey.OP_WRITE );
+
+		//prepare for deferred writes
+		dw = new DeferredWrite( res.body() );
 	}
 
 	/** Writes the entire ByteBuffer to the given SocketChannel */
@@ -333,50 +298,6 @@ class Client2
 			sc.close();
 		}
 		catch(IOException e) {}
-	}
-
-	/** Converts the HTTPResponse to a bytebuffer */
-	ByteBuffer responseToByteArray(AsyncHttpResponse2 res, String httpProtocol) throws IOException
-	{
-		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-
-		//write the response line & headers
-		{
-			BufferedWriter out = new BufferedWriter( new OutputStreamWriter(byteOut) );
-
-			//response line
-			out.write( httpProtocol );
-			out.write(" ");
-			out.write( res.responseLine() );
-			out.newLine();
-
-			//headers
-			Iterator< Map.Entry<String, String> > it = res.headerIterator();
-			while( it.hasNext() )
-			{
-				Map.Entry<String, String> e = it.next();
-
-				out.write( e.getKey() );
-				out.write(": ");
-				out.write( e.getValue() );
-				out.newLine();
-			}
-
-			out.newLine();
-			out.flush();
-		}
-
-		//copy the response body into the buffer
-		copyStream( res.body(), byteOut );
-
-		return ByteBuffer.wrap( byteOut.toByteArray() );
-	}
-
-	private byte[] streamCopyBuf = new byte[1024 * 4];
-	private void copyStream(InputStream in, OutputStream out) throws IOException
-	{
-		for( int bytesRead = in.read(streamCopyBuf); bytesRead != -1; bytesRead = in.read(streamCopyBuf) )
-			out.write(streamCopyBuf, 0, bytesRead);
 	}
 
 	private class DeferredWrite

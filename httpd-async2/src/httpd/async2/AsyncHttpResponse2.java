@@ -36,7 +36,6 @@ class AsyncHttpResponse2 implements HttpResponse
 	private String responseLine;
 	private HashMap<String, String> headers = new HashMap<>();
 	private InputStream in;
-	private boolean deferredWrite;
 
 	AsyncHttpResponse2() {}
 
@@ -70,21 +69,10 @@ class AsyncHttpResponse2 implements HttpResponse
 		return this;
 	}
 
-	/**
-	 * By toggling this flag, you hint to the HttpServer handling your response that you want it to be handled with a deferred write.
-	 * Only AsyncHttpServer2 supports deferred writes.
-	 * @return this
-	 */
-	public AsyncHttpResponse2 deferredWrite(boolean on)
-	{
-		deferredWrite = on;
-		return this;
-	}
-
 	String responseLine() { return responseLine; }
 	Iterator<Map.Entry<String, String>> headerIterator() { return headers.entrySet().iterator(); }
 	InputStream body() { return in; }
-	boolean deferredWrite() { return deferredWrite; }
+	boolean deferredWrite() { return true; }
 	boolean hasContentLengthHeader() { return headers.containsKey("Content-Length"); }
 	void closeBodyStream()
 	{

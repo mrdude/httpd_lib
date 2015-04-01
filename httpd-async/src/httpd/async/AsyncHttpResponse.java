@@ -69,11 +69,6 @@ class AsyncHttpResponse implements HttpResponse
 		return this;
 	}
 
-	public AsyncHttpResponse deferredWrite(boolean on)
-	{
-		return this;
-	}
-
 	String responseLine() { return responseLine; }
 	Iterator<Map.Entry<String, String>> headerIterator() { return headers.entrySet().iterator(); }
 	InputStream body() { return in; }
