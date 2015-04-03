@@ -36,13 +36,14 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 //TODO drop connections that take too long -- to fight BEAST
 public class AsyncHttpServer2 implements HttpServer
 {
 	private static final Logger logger = LoggerFactory.getLogger(AsyncHttpServer2.class);
 
-	private volatile boolean quitFlag;
+	private final AtomicBoolean quitFlag = new AtomicBoolean( false );
 	private Thread t;
 
 	private RequestHandler reqHandler;
@@ -77,7 +78,7 @@ public class AsyncHttpServer2 implements HttpServer
 		logger.info("End of bound interfaces");
 
 		t = new Thread( AsyncHttpServer2.this::run );
-		t.setName("AsyncHttpServerThread");
+		t.setName( "AsyncHttpServerThread" );
 		t.start();
 	}
 
@@ -88,7 +89,7 @@ public class AsyncHttpServer2 implements HttpServer
 			//update the selector
 			try
 			{
-				updateSelector();
+				updateSelector( quitFlag.get() );
 			}
 			catch(IOException e)
 			{
@@ -96,13 +97,21 @@ public class AsyncHttpServer2 implements HttpServer
 				e.printStackTrace(System.err);
 			}
 
+			//update all SocketChannel keys if we are shutting down
+			if( quitFlag.get() )
+			{
+				for( SelectionKey key : selector.keys() )
+					if( key.channel() instanceof SocketChannel )
+						((Client2)key.attachment()).update( key );
+			}
+
 			//exit the loop if we have no clients and the quitFlag is set
-			if( quitFlag && countClients() == 0 )
+			if( quitFlag.get() && countClients() == 0 )
 				break;
 		}
 
 		//close the selector and all ServerSockets
-		logger.info("Finished all requests...shutting down");
+		logger.info( "Finished all requests...shutting down" );
 		try
 		{
 			selector.close();
@@ -112,7 +121,7 @@ public class AsyncHttpServer2 implements HttpServer
 			e.printStackTrace();
 		}
 
-		logger.info("Shut down");
+		logger.info( "Shut down" );
 	}
 
 	private int countClients()
@@ -125,9 +134,13 @@ public class AsyncHttpServer2 implements HttpServer
 		return count;
 	}
 
-	private void updateSelector() throws IOException
+	private void updateSelector(boolean useSelectNow) throws IOException
 	{
-		selector.select();
+		if( useSelectNow )
+			selector.selectNow();
+		else
+			selector.select();
+
 		Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 		while( it.hasNext() )
 		{
@@ -137,7 +150,7 @@ public class AsyncHttpServer2 implements HttpServer
 			if( !key.isValid() )
 				continue;
 
-			if( key.isAcceptable() && !quitFlag ) //only accept new connections if quitFlag == false
+			if( key.isAcceptable() && !quitFlag.get() ) //only accept new connections if quitFlag == false
 				accept(key);
 			else if( key.isReadable() )
 				read(key);
@@ -155,7 +168,7 @@ public class AsyncHttpServer2 implements HttpServer
 			SocketChannel sc = ssc.accept();
 			sc.configureBlocking(false);
 			SelectionKey clientKey = sc.register(selector, SelectionKey.OP_READ);
-			clientKey.attach( new Client2(this, sc) );
+			clientKey.attach( new Client2(this, sc, quitFlag) );
 		}
 		catch(IOException e) {}
 	}
@@ -174,7 +187,7 @@ public class AsyncHttpServer2 implements HttpServer
 
 	public void stop()
 	{
-		quitFlag = true;
+		quitFlag.set( true );
 		selector.wakeup();
 		logger.info("Waiting for current requests to complete...");
 	}

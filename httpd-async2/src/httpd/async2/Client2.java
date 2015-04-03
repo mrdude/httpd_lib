@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class Client2
 {
@@ -42,11 +43,14 @@ class Client2
 	private AsyncHttpRequest2 req;
 	private boolean useKeepAliveConnection; //should we use a keep-alive connection?
 
+	private final AtomicBoolean quitFlag;
+
 	private DeferredWrite dw;
 
-	Client2(AsyncHttpServer2 sv, SocketChannel sc)
+	Client2(AsyncHttpServer2 sv, SocketChannel sc, AtomicBoolean quitFlag)
 	{
 		this.sv = sv;
+		this.quitFlag = quitFlag;
 
 		try
 		{
@@ -55,6 +59,19 @@ class Client2
 		catch(IOException e) {}
 
 		logger.info("New client: {}", addr == null ? "Unknown address" : addr);
+	}
+
+	void update(SelectionKey key)
+	{
+		if( (key.interestOps() & SelectionKey.OP_READ) == SelectionKey.OP_READ ) //the READ interest op is set on this key
+		{
+			if( quitFlag.get() ) //the server is shutting down
+			{
+				logger.info( "Req = {}", req );
+				if( req == null ) //we don't have a request
+					close( key ); //close the connection
+			}
+		}
 	}
 
 	void read(SelectionKey key)
@@ -97,7 +114,12 @@ class Client2
 	void write(SelectionKey key)
 	{
 		if( dw.update(key) )
-			completeRequest(key);
+		{
+			completeRequest( key );
+
+			if( quitFlag.get() ) //the server is shutting down
+				close( key ); //close the connection
+		}
 	}
 
 	/** Checks the ByteBuffer for a \n */
@@ -305,6 +327,7 @@ class Client2
 		public abstract boolean update(SelectionKey key);
 	}
 
+	/** Copies data from the given InputStream to an internal buffer, which is then written to the socket.  */
 	private class CopyingDeferredWrite extends DeferredWrite
 	{
 		private ReadableByteChannel inChannel;
@@ -344,6 +367,7 @@ class Client2
 		}
 	}
 
+	/** Uses FileChannel.transferTo() to directly write the response data to the socket. */
 	private class FileChannelDeferredWrite extends DeferredWrite
 	{
 		private FileChannel inChannel;
