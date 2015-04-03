@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="httpd-interfaces:jar">
+  <artifact build-on-make="true" name="httpd-interfaces:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/httpd_interfaces_jar</output-path>
     <root id="root">
       <element id="archive" name="httpd-interfaces.jar">

@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="httpd-async2:jar">
+  <artifact build-on-make="true" name="httpd-async2:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/httpd_async2_jar</output-path>
     <root id="root">
       <element id="archive" name="httpd-async2.jar">

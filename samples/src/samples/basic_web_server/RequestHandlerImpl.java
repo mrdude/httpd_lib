@@ -55,8 +55,7 @@ class RequestHandlerImpl implements RequestHandler
 		   .header( "Server", "BasicWebServer-httpd_lib" )
 		   .header( "Content-Length", Long.toString( responseFile.length() ) )
 		   .header( "Content-Type", "text/html" )
-		   .body( responseFileInputStream )
-		   .deferredWrite( true ); //this is so that writing the client's response to the socket won't block other clients
+		   .body( responseFileInputStream );
 	}
 
 	public void generate500Page(HttpRequest req, HttpResponse res)

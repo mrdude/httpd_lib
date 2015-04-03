@@ -359,8 +359,8 @@ class Client2
 			{
 				SocketChannel sc = (SocketChannel) key.channel();
 
-				long bytesWritten = inChannel.transferTo( pos, 1024 * 4, sc );
-				if( bytesWritten == -1 ) //end of file was reached -- return true
+				long bytesWritten = inChannel.transferTo( pos, 1024 * 1024, sc ); //transfer bytes 1MB at a time
+				if( pos >= inChannel.size() || bytesWritten == -1 ) //end of file was reached -- return true
 					return true;
 
 				pos += bytesWritten;
