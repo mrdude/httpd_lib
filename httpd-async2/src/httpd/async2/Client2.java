@@ -54,7 +54,7 @@ class Client2
 		}
 		catch(IOException e) {}
 
-		logger.info("New client: {}" ,addr == null ? "Unknown address" : addr);
+		logger.info("New client: {}", addr == null ? "Unknown address" : addr);
 	}
 
 	void read(SelectionKey key)
@@ -308,6 +308,7 @@ class Client2
 	private class CopyingDeferredWrite extends DeferredWrite
 	{
 		private ReadableByteChannel inChannel;
+		private ByteBuffer buf = ByteBuffer.allocate( 4096 );
 
 		public CopyingDeferredWrite( InputStream in )
 		{
