@@ -14,6 +14,7 @@ public class Parsers
 		public String request;
 		public String protocol;
 		public ImmutableMap<String, String> getParameters;
+		public String requestURL;
 	}
 
 	/**
@@ -37,20 +38,21 @@ public class Parsers
 		InitialRequestLine req = new InitialRequestLine();
 
 		req.method = split[0];
+		req.requestURL = split[1];
 		req.protocol = split[2];
 
 		try
 		{
-			int queryIndex = split[1].indexOf( "?" );
+			int queryIndex = req.requestURL.indexOf( "?" );
 			if( queryIndex == -1 )
 			{
-				req.request = URLDecoder.decode( split[1], "UTF-8" );
+				req.request = URLDecoder.decode( req.requestURL, "UTF-8" );
 				req.getParameters = ImmutableMap.of();
 			}
 			else
 			{
-				req.request = URLDecoder.decode( split[1].substring(0, queryIndex), "UTF-8" );
-				req.getParameters = parseGetParameters( split[1].substring( queryIndex+1 ) );
+				req.request = URLDecoder.decode( req.requestURL.substring(0, queryIndex), "UTF-8" );
+				req.getParameters = parseGetParameters( req.requestURL.substring( queryIndex+1 ) );
 			}
 		}
 		catch( UnsupportedEncodingException e )

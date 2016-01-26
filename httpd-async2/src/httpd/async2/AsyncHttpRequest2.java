@@ -35,6 +35,7 @@ import java.util.HashMap;
 class AsyncHttpRequest2 implements HttpRequest
 {
 	private volatile boolean locked; //is this object locked?
+	private String initialRequestLine;
 	private String method;
 	private String request;
 	private String protocol;
@@ -59,6 +60,7 @@ class AsyncHttpRequest2 implements HttpRequest
 		if( req == null )
 			return false;
 
+		initialRequestLine = req.requestURL;
 		method = req.method;
 		request = req.request;
 		protocol = req.protocol;
@@ -100,6 +102,7 @@ class AsyncHttpRequest2 implements HttpRequest
 		headers = null; //get rid of the headers object -- we don't need it anymore, so it can be GC-ed
 	}
 
+	public String initialRequestLine() { return initialRequestLine; }
 	public String method() { return method; }
 	public String request() { return request; }
 	public String protocol() { return protocol; }

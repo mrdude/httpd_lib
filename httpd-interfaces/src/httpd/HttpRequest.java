@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMap;
 
 public interface HttpRequest
 {
+	String initialRequestLine();
 	String method();
 	String request();
 	String protocol();

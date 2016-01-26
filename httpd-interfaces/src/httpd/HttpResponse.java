@@ -47,6 +47,14 @@ public interface HttpResponse
 	HttpResponse body(InputStream in);
 
 	/**
+	 * Sets the file whose contents will become the body of the response
+	 */
+	default HttpResponse body(File file) throws FileNotFoundException
+	{
+		return body( new FileInputStream(file) );
+	}
+
+	/**
 	 * Sets the byte array that will become the body of the response
 	 * @return this
 	 */
